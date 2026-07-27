@@ -6,24 +6,28 @@ Demos, guides, and getting-started material for running [OpenShell](https://docs
 
 ### [Getting Started with OpenShell on OpenShift](guides/getting-started-openshell-openshift.md)
 
-End-to-end walkthrough covering Helm installation, Route-based gateway exposure, mTLS setup, provider registration, sandbox creation, running Claude Code inside a sandbox, and egress policy management.
+End-to-end guide for installing OpenShell with Helm, exposing the gateway through an OpenShift Route, configuring mTLS, registering a provider, creating a sandbox, running Claude Code in the sandbox, and managing egress policies.
 
 ### [Inference Routing with RHOAI](guides/inference-routing-rhoai.md)
 
 Route sandbox inference traffic through a token-authenticated RHOAI-served model using the OpenShell privacy router, without exposing credentials to the sandbox.
 
+### [OpenShell Capability Testing and Security Analysis](scc-requirements.md)
+
+Testing results for OpenShell v0.0.85 on OpenShift, including capability behavior in the supervisor and sandbox user contexts.
+
 ## Demos
 
 ### [MLflow OpenShell Tracing](demos/mlflow-openshell-tracing/)
 
-Enablement content showing how to capture MLflow traces from AI agents running in OpenShell sandboxes into the managed MLflow instance on RHOAI.
+Demonstrates how to capture MLflow traces from AI agents running in OpenShell sandboxes and send them to the managed MLflow instance on RHOAI.
 
-**What it shows:**
+**The demo includes:**
 
 - **MLflow auto-instrumentation** — `mlflow.openai.autolog()` captures all LLM calls as traces with zero code changes
-- **OpenShell inference routing** — Agent code calls `inference.local` via the OpenAI SDK; the OpenShell proxy handles model credentials
-- **Environment variable injection** — `MLFLOW_TRACKING_URI` passed via `--env` (not `--credential`) for direct SDK access
-- **Sandbox network policy** — Explicit network access to the MLflow tracking server from sandboxed workloads
+- **OpenShell inference routing** - Agent code sends requests to `inference.local` through the OpenAI SDK, and the OpenShell proxy handles model credentials
+- **Environment variable injection** — Passes `MLFLOW_TRACKING_URI` by using `--env` instead of `--credential` for direct SDK access
+- **Sandbox network policy** — Configures explicit network access from sandboxed workloads to the MLflow tracking server
 
 **Stack:** Python, OpenAI SDK, MLflow, OpenShell, RHOAI
 
