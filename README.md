@@ -8,6 +8,10 @@ Demos, guides, and getting-started material for running [OpenShell](https://docs
 
 End-to-end guide for installing OpenShell with Helm, exposing the gateway through an OpenShift Route, configuring mTLS, registering a provider, creating a sandbox, running Claude Code in the sandbox, and managing egress policies.
 
+### [Running OpenShell sandboxes with Kata runtime on OpenShift](guides/openshell-with-osc.md)
+
+Configure OpenShell sandboxes to use a Kata-backed `RuntimeClass` in `sidecar` topology on OpenShift, then verify the VM isolation boundary and network policy enforcement.
+
 ### [Inference Routing with RHOAI](guides/inference-routing-rhoai.md)
 
 Route sandbox inference traffic through a token-authenticated RHOAI-served model using the OpenShell privacy router, without exposing credentials to the sandbox.
