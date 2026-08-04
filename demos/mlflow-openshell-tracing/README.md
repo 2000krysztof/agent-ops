@@ -23,8 +23,8 @@ This guide covers the full path: installing Agent Sandbox and OpenShell, configu
 │  │     └── mlflow.openai.autolog()                           │  │
 │  │              │                                            │  │
 │  └──────────────┼────────────────────────────────────────────┘  │
-│                 │  MLFLOW_TRACKING_URI (via --env)               │
-│                 ▼                                                │
+│                 │  MLFLOW_TRACKING_URI (via --env)              │
+│                 ▼                                               │
 │  ┌────────────────────────────┐                                 │
 │  │  MLflow Tracking Server    │◄── reencrypt Route              │
 │  │  (RHOAI managed)           │                                 │
@@ -51,29 +51,22 @@ This guide covers the full path: installing Agent Sandbox and OpenShell, configu
 - The OpenShell CLI (`openshell`) version 0.0.85 is installed locally. For installation, see the [OpenShell quickstart](https://docs.nvidia.com/openshell/latest/get-started/quickstart).
 - The Helm CLI (`helm`) is installed.
 
-## 1. Install Agent Sandbox Custom Resource Definitions (CRDs)
+## 1. Install the Agent Sandbox Operator
 
 > **Note:** Steps 1–3 install OpenShell on OpenShift. If OpenShell is already running on your cluster, skip to [step 4](#4-expose-mlflow-via-a-reencrypt-route). This guide uses `server.disableTls=true` with a local port-forward rather than the mTLS-over-Route approach in the [OpenShell getting-started guide](https://docs.nvidia.com/openshell/latest/get-started/quickstart) — a simpler setup for demos that avoids certificate management.
 
-OpenShell requires the [Agent Sandbox](https://agent-sandbox.sigs.k8s.io) Kubernetes SIG project. Install the CRDs and controller before the OpenShell chart:
-
-```bash
-# Run locally — applies upstream SIG manifests to the cluster
-kubectl apply -f https://github.com/kubernetes-sigs/agent-sandbox/releases/download/v0.5.2/sandbox.yaml
-```
-
-Confirm that the controller is running:
+OpenShell requires the Red Hat build of Agent Sandbox v0.9.0, installed on the cluster via the Software Catalog. Verify the operator is installed:
 
 ```bash
 # Run locally
-oc -n agent-sandbox-system get pods
+oc get csv -n openshift-operators | grep agent-sandbox
 ```
 
-> **Note:** `kubectl apply` is used above because this is an upstream Kubernetes SIG artifact. All subsequent commands use `oc`.
+The output should show `agent-sandbox-operator.v0.9.0` with status `Succeeded`.
 
 ## 2. Deploy OpenShell on OpenShift
 
-> **Warning:** This step disables TLS on the gateway and allows unauthenticated access. These settings are acceptable here because the gateway is accessed only through a local port-forward (`localhost:8080`), not through an externally exposed Route. If you need a production-grade install with mTLS over a Route, see the [OpenShell getting-started guide](https://docs.nvidia.com/openshell/latest/get-started/quickstart).
+> **Warning:** This step disables TLS on the gateway and allows unauthenticated access. These settings are acceptable here because the gateway is accessed only through a local port-forward (`localhost:8080`), not through an externally exposed Route. If you need mTLS over a Route, see the [OpenShell getting-started guide](https://docs.nvidia.com/openshell/latest/get-started/quickstart).
 
 Create the namespace and grant the required Security Context Constraint (SCC):
 
@@ -386,8 +379,8 @@ helm uninstall openshell -n openshell
 oc adm policy remove-scc-from-user privileged -z openshell-sandbox -n openshell
 oc delete ns openshell
 
-# Remove the Agent Sandbox CRDs
-kubectl delete -f https://github.com/kubernetes-sigs/agent-sandbox/releases/download/v0.5.2/sandbox.yaml
+# Remove the Agent Sandbox Operator (via the OpenShift Console or CLI)
+oc delete csv agent-sandbox-operator.v0.9.0 -n openshift-operators
 
 # Stop the background port-forward
 kill "$PORT_FORWARD_PID" 2>/dev/null || true
