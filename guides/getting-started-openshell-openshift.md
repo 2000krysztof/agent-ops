@@ -20,6 +20,17 @@ Unless noted otherwise, run all commands on your local machine.
 - You have obtained credentials for a supported inference provider. This guide uses an Anthropic Claude model served through Google Vertex AI as the example. OpenShell also supports other provider types; configuration requirements differ by provider. Check the [Supported Provider Types](https://docs.nvidia.com/openshell/latest/sandboxes/manage-providers#supported-provider-types) table for details.
 - The Google Cloud CLI (`gcloud`) is installed and authenticated with Application Default Credentials (`gcloud auth application-default login`). Only required when using the Vertex AI example provider.
 
+> [!NOTE]
+> OpenShell requires a default storage class that supports dynamic volume provisioning. The gateway and sandbox pods use PersistentVolumeClaims (PVCs) for database storage and workspace data.
+>
+> Managed OpenShift clusters, such as Red Hat OpenShift Service on AWS (ROSA), provide a default storage class. For self-managed clusters, verify that a default storage class is available by running:
+>
+> ```shell
+> oc get storageclass
+> ```
+>
+> The default storage class is marked with the `(default)` annotation. If your cluster does not have a default storage class that supports dynamic provisioning, see [OpenShift Container Platform Storage](https://docs.redhat.com/en/documentation/openshift_container_platform/4.21/html/storage/storage-overview).
+
 ## Install the OpenShell CLI
 
 The following command downloads and executes the upstream installer script from the NVIDIA OpenShell repository:
@@ -63,7 +74,8 @@ Choose a database backend before installing. OpenShell supports SQLite (the defa
 
 ### Option A: SQLite (default)
 
-> **Note:** SQLite is not recommended for production environments. It is suitable for testing purposes and quick, easy-setup scenarios.
+> [!NOTE]
+> SQLite is not recommended for production environments. It is suitable for testing purposes and quick, easy-setup scenarios.
 
 SQLite stores data in a file on a per-pod `PVC` and runs the gateway as a `StatefulSet`. An external database is not required:
 
@@ -245,7 +257,8 @@ Ask Claude, or your agent of choice, to curl `https://github.com`. The default p
 Output: The curl command failed with a 403 Forbidden error.
 ```
 
-> **Note:** You can also run `curl https://github.com` directly in the sandbox shell to verify the policy deterministically.
+> [!NOTE]
+> You can also run `curl https://github.com` directly in the sandbox shell to verify the policy deterministically.
 
 From your local machine, add a policy to allow access:
 
