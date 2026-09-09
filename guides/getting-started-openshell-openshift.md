@@ -36,7 +36,7 @@ Unless noted otherwise, run all commands on your local machine.
 The following command downloads and executes the upstream installer script from the NVIDIA OpenShell repository:
 
 ```shell
-curl -LsSf https://raw.githubusercontent.com/NVIDIA/OpenShell/main/install.sh | OPENSHELL_VERSION=v0.0.85 sh
+curl -LsSf https://raw.githubusercontent.com/NVIDIA/OpenShell/main/install.sh | OPENSHELL_VERSION=v0.0.116 sh
 ```
 
 ## Create the OpenShell namespace
@@ -81,8 +81,10 @@ SQLite stores data in a file on a per-pod `PVC` and runs the gateway as a `State
 
 ```shell
 helm install openshell oci://ghcr.io/nvidia/openshell/helm-chart \
-  --version 0.0.85 \
+  --version 0.0.116 \
   --namespace openshell \
+  --set image.repository=quay.io/opendatahub/odh-openshell-gateway \
+  --set image.tag=v0.0.116-rhaiv.0 \
   --set podSecurityContext.fsGroup=null \
   --set securityContext.runAsUser=null \
   --set server.auth.allowUnauthenticatedUsers=true \
@@ -113,8 +115,10 @@ Install the OpenShell Helm chart pointing at the `Secret`:
 
 ```shell
 helm install openshell oci://ghcr.io/nvidia/openshell/helm-chart \
-  --version 0.0.85 \
+  --version 0.0.116 \
   --namespace openshell \
+  --set image.repository=quay.io/opendatahub/odh-openshell-gateway \
+  --set image.tag=v0.0.116-rhaiv.0 \
   --set workload.kind=deployment \
   --set server.externalDbSecret=postgresql-credentials \
   --set podSecurityContext.fsGroup=null \
@@ -200,7 +204,7 @@ Server Status
   Gateway: openshift
   Server: https://<ROUTE_HOST>
   Status: Connected
-  Version: 0.0.85
+  Version: 0.0.116-rhaiv.0
 ```
 
 `Connected` means the `openshell` CLI completed a full mTLS handshake with the gateway running in your cluster. Everything from here on talks to that gateway, not to Kubernetes directly.
