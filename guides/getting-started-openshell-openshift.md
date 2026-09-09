@@ -33,10 +33,12 @@ Unless noted otherwise, run all commands on your local machine.
 
 ## Install the OpenShell CLI
 
-The following command downloads and executes the upstream installer script from the NVIDIA OpenShell repository:
+From a checked-out copy of this repository, run the installer wrapper. The
+wrapper downloads `install.sh` from the immutable upstream commit for OpenShell
+v0.0.116 and verifies its pinned SHA-256 checksum before execution:
 
 ```shell
-curl -LsSf https://raw.githubusercontent.com/NVIDIA/OpenShell/main/install.sh | OPENSHELL_VERSION=v0.0.85 sh
+./scripts/install-openshell-cli.sh
 ```
 
 ## Create the OpenShell namespace
@@ -67,6 +69,12 @@ echo "$ROUTE_HOST"
 
 See the [OpenShell Helm chart README.md file](https://github.com/NVIDIA/OpenShell/blob/main/deploy/helm/openshell/README.md) for full chart details.
 
+Set the tag shared by the Red Hat gateway and supervisor images:
+
+```shell
+ODH_IMAGE_TAG=v0.0.116-rhaiv.0
+```
+
 Choose a database backend before installing. OpenShell supports SQLite (the default) and external PostgreSQL. Choose **one** of the two options below.
 
 > [!WARNING]
@@ -81,8 +89,12 @@ SQLite stores data in a file on a per-pod `PVC` and runs the gateway as a `State
 
 ```shell
 helm install openshell oci://ghcr.io/nvidia/openshell/helm-chart \
-  --version 0.0.85 \
+  --version 0.0.116 \
   --namespace openshell \
+  --set image.repository=quay.io/opendatahub/odh-openshell-gateway \
+  --set image.tag="${ODH_IMAGE_TAG}" \
+  --set supervisor.image.repository=quay.io/opendatahub/odh-openshell-supervisor \
+  --set supervisor.image.tag="${ODH_IMAGE_TAG}" \
   --set podSecurityContext.fsGroup=null \
   --set securityContext.runAsUser=null \
   --set server.auth.allowUnauthenticatedUsers=true \
@@ -113,8 +125,12 @@ Install the OpenShell Helm chart pointing at the `Secret`:
 
 ```shell
 helm install openshell oci://ghcr.io/nvidia/openshell/helm-chart \
-  --version 0.0.85 \
+  --version 0.0.116 \
   --namespace openshell \
+  --set image.repository=quay.io/opendatahub/odh-openshell-gateway \
+  --set image.tag="${ODH_IMAGE_TAG}" \
+  --set supervisor.image.repository=quay.io/opendatahub/odh-openshell-supervisor \
+  --set supervisor.image.tag="${ODH_IMAGE_TAG}" \
   --set workload.kind=deployment \
   --set server.externalDbSecret=postgresql-credentials \
   --set podSecurityContext.fsGroup=null \
@@ -200,7 +216,7 @@ Server Status
   Gateway: openshift
   Server: https://<ROUTE_HOST>
   Status: Connected
-  Version: 0.0.85
+  Version: 0.0.116-rhaiv.0
 ```
 
 `Connected` means the `openshell` CLI completed a full mTLS handshake with the gateway running in your cluster. Everything from here on talks to that gateway, not to Kubernetes directly.

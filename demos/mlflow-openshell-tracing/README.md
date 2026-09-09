@@ -48,7 +48,7 @@ This guide covers the full path: installing Agent Sandbox and OpenShell, configu
 - The MLflow Tracking Server is deployed as part of RHOAI.
 - An inference model provider is configured (MaaS, vLLM, or another OpenAI-compatible endpoint).
 - The OpenShift CLI (`oc`) is installed and authenticated to the cluster.
-- The OpenShell CLI (`openshell`) version 0.0.85 is installed locally. For installation, see the [OpenShell quickstart](https://docs.nvidia.com/openshell/latest/get-started/quickstart).
+- The OpenShell CLI (`openshell`) version 0.0.116 is installed locally. For installation, see the [OpenShell quickstart](https://docs.nvidia.com/openshell/latest/get-started/quickstart).
 - The Helm CLI (`helm`) is installed.
 
 ## 1. Install the Agent Sandbox Operator
@@ -82,9 +82,15 @@ Install the OpenShell Helm chart with OpenShift overrides:
 
 ```bash
 # Run locally
+ODH_IMAGE_TAG=v0.0.116-rhaiv.0
+
 helm install openshell oci://ghcr.io/nvidia/openshell/helm-chart \
-  --version 0.0.85 \
+  --version 0.0.116 \
   --namespace openshell \
+  --set image.repository=quay.io/opendatahub/odh-openshell-gateway \
+  --set image.tag="${ODH_IMAGE_TAG}" \
+  --set supervisor.image.repository=quay.io/opendatahub/odh-openshell-supervisor \
+  --set supervisor.image.tag="${ODH_IMAGE_TAG}" \
   --set server.disableTls=true \
   --set podSecurityContext.fsGroup=null \
   --set securityContext.runAsUser=null \

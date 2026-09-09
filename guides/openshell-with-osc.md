@@ -50,7 +50,7 @@ KATA_RUNTIMECLASS=<runtime-class-name>
 2. Update the OpenShell Helm chart to set the runtime class, sidecar topology, and binary-aware network policy:
 ```shell
 helm upgrade openshell oci://ghcr.io/nvidia/openshell/helm-chart \
-  --version 0.0.85 \
+  --version 0.0.116 \
   --namespace openshell \
   --reuse-values \
   --set supervisor.topology=sidecar \
@@ -282,7 +282,7 @@ openshell sandbox delete kata-demo
 
 ```shell
 helm upgrade openshell oci://ghcr.io/nvidia/openshell/helm-chart \
-  --version 0.0.85 \
+  --version 0.0.116 \
   --namespace openshell \
   --reuse-values \
   --set supervisor.topology=combined \

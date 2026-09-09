@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# OpenShell v0.0.85 deployment for OpenShift
+# OpenShell v0.0.116 deployment for OpenShift
 # Based on opendatahub-io/agent-ops pinned version testing
 
 set -euo pipefail
@@ -10,7 +10,12 @@ PROJECT_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
 # Configuration with defaults
 NAMESPACE="${OPENSHELL_NAMESPACE:-openshell}"
 GATEWAY_NAME="${OPENSHELL_GATEWAY_NAME:-openshift}"
-HELM_VERSION="${OPENSHELL_HELM_VERSION:-0.0.85}"
+HELM_VERSION="${OPENSHELL_HELM_VERSION:-0.0.116}"
+ODH_IMAGE_TAG="${ODH_IMAGE_TAG:-v0.0.116-rhaiv.0}"
+GATEWAY_IMAGE_REPOSITORY="${OPENSHELL_GATEWAY_IMAGE_REPOSITORY:-quay.io/opendatahub/odh-openshell-gateway}"
+GATEWAY_IMAGE_TAG="${OPENSHELL_GATEWAY_IMAGE_TAG:-${ODH_IMAGE_TAG}}"
+SUPERVISOR_IMAGE_REPOSITORY="${OPENSHELL_SUPERVISOR_IMAGE_REPOSITORY:-quay.io/opendatahub/odh-openshell-supervisor}"
+SUPERVISOR_IMAGE_TAG="${OPENSHELL_SUPERVISOR_IMAGE_TAG:-${ODH_IMAGE_TAG}}"
 SCC_NAME="${OPENSHELL_SCC:-openshell-sandbox-minimum-required}"
 
 # Validate inputs to prevent injection attacks
@@ -40,7 +45,7 @@ if [[ ! "$GATEWAY_NAME" =~ ^[A-Za-z0-9][A-Za-z0-9._-]*$ ]]; then
 fi
 
 if [[ ! "$HELM_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-    echo "ERROR: Invalid Helm version. Must be in semver format (e.g., 0.0.85)." >&2
+    echo "ERROR: Invalid Helm version. Must be in semver format (e.g., 0.0.116)." >&2
     exit 1
 fi
 
@@ -87,7 +92,7 @@ check_prerequisites() {
     # Check openshell CLI
     if ! command -v openshell &> /dev/null; then
         log_error "OpenShell CLI is not installed. Install with:"
-        log_error "  curl -LsSf https://raw.githubusercontent.com/NVIDIA/OpenShell/main/install.sh | OPENSHELL_VERSION=v${HELM_VERSION} sh"
+        log_error "  ${SCRIPT_DIR}/install-openshell-cli.sh"
         exit 1
     fi
     log_info "OpenShell CLI: $(openshell --version 2>&1 | head -1 || echo 'installed')"
@@ -175,6 +180,10 @@ install_helm() {
         helm upgrade openshell oci://ghcr.io/nvidia/openshell/helm-chart \
             --version "${HELM_VERSION}" \
             --namespace "${NAMESPACE}" \
+            --set image.repository="${GATEWAY_IMAGE_REPOSITORY}" \
+            --set image.tag="${GATEWAY_IMAGE_TAG}" \
+            --set supervisor.image.repository="${SUPERVISOR_IMAGE_REPOSITORY}" \
+            --set supervisor.image.tag="${SUPERVISOR_IMAGE_TAG}" \
             --set podSecurityContext.fsGroup=null \
             --set securityContext.runAsUser=null \
             --set server.auth.allowUnauthenticatedUsers=true \
@@ -184,6 +193,10 @@ install_helm() {
         helm install openshell oci://ghcr.io/nvidia/openshell/helm-chart \
             --version "${HELM_VERSION}" \
             --namespace "${NAMESPACE}" \
+            --set image.repository="${GATEWAY_IMAGE_REPOSITORY}" \
+            --set image.tag="${GATEWAY_IMAGE_TAG}" \
+            --set supervisor.image.repository="${SUPERVISOR_IMAGE_REPOSITORY}" \
+            --set supervisor.image.tag="${SUPERVISOR_IMAGE_TAG}" \
             --set podSecurityContext.fsGroup=null \
             --set securityContext.runAsUser=null \
             --set server.auth.allowUnauthenticatedUsers=true \
@@ -291,6 +304,8 @@ display_info() {
     echo ""
     log_info "Gateway: ${GATEWAY_NAME}"
     log_info "Version: ${HELM_VERSION}"
+    log_info "Gateway image: ${GATEWAY_IMAGE_REPOSITORY}:${GATEWAY_IMAGE_TAG}"
+    log_info "Supervisor image: ${SUPERVISOR_IMAGE_REPOSITORY}:${SUPERVISOR_IMAGE_TAG}"
     echo ""
     log_info "Check status:"
     echo "  openshell status"
